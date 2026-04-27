@@ -4,9 +4,7 @@ import com.gym.mall.dto.commodityDTO;
 import com.gym.mall.service.CommodityService;
 import com.gym.mall.service.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 //自动JSON转换：方法的返回值会自动转换为JSON格式
@@ -25,4 +23,19 @@ public class commodityController {
         //将 HTTP 请求体中的数据自动绑定到 Java 对象上
         return Response.newSuccess(commodityService.addCommodity(commodityDTO));
     }
+
+    @GetMapping("/commodity/{id}")
+    public Response<commodityDTO> getCommodityById(@PathVariable Long id){
+                                                    //提取 URL 路径中的动态参数
+        return Response.newSuccess(commodityService.getCommodityById(id));
+    }
+
+    @PutMapping("/commodity/{id}")
+    public Response<commodityDTO> updateCommodityById(@PathVariable long id,
+                                                      @RequestParam(required = false) String name,
+                                                      //从请求参数中绑定数据到方法参数
+                                                      @RequestParam(required= false) String price){
+        return Response.newSuccess(commodityService.updateCommodityById(id, name, price));
+    }
+
 }

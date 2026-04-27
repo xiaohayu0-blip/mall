@@ -7,6 +7,8 @@ import com.gym.mall.dto.commodityDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -26,5 +28,24 @@ public class CommodityServiceImpl implements CommodityService {
         }
         Commodity commodity = commodityRepository.save(CommodityConverter.converterCommodity(commodityDTO));
         return commodity.getId();
+    }
+
+    @Override
+    public commodityDTO getCommodityById(Long commodityId) {
+        Commodity commodity=commodityRepository.findById(commodityId).orElseThrow(RuntimeException::new);
+        return CommodityConverter.converterCommodity(commodity);
+    }
+
+    @Override
+    public commodityDTO updateCommodityById(Long id, String name, String price) {
+            Commodity commodityInDB=commodityRepository.findById(id).orElseThrow(RuntimeException::new);
+        if(StringUtils.hasLength(name) && !commodityInDB.getName().equals(name)){
+            commodityInDB.setName(name);
+        }
+        if(StringUtils.hasLength(price) && !commodityInDB.getPrice().equals(price)){
+            commodityInDB.setPrice(price);
+        }
+        Commodity commodity = commodityRepository.save(commodityInDB);
+        return  CommodityConverter.converterCommodity(commodity);
     }
 }
