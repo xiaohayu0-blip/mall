@@ -1,13 +1,13 @@
-package com.gym.mall.service;
+package com.gym.mall.service.Impl;
 
 import com.gym.mall.converter.CommodityConverter;
 import com.gym.mall.dao.Commodity;
-import com.gym.mall.dao.CommodityRepository;
+import com.gym.mall.Repository.CommodityRepository;
 import com.gym.mall.dto.commodityDTO;
+import com.gym.mall.service.CommodityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;

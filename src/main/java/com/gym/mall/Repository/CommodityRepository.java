@@ -1,5 +1,6 @@
-package com.gym.mall.dao;
+package com.gym.mall.Repository;
 
+import com.gym.mall.dao.Commodity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
