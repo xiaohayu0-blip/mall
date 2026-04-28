@@ -38,4 +38,14 @@ public class commodityController {
         return Response.newSuccess(commodityService.updateCommodityById(id, name, price));
     }
 
+    @DeleteMapping("/commodity/{id}")
+    public Response<String> deleteCommodityById(@PathVariable Long id){
+        try {
+            commodityService.deleteCommodityById(id);
+            return Response.newSuccess("删除成功");
+        } catch (Exception e) {
+            return Response.newFail("删除失败");
+        }
+    }
+
 }

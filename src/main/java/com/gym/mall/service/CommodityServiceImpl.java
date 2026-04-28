@@ -27,6 +27,8 @@ public class CommodityServiceImpl implements CommodityService {
             throw new IllegalStateException("id"+commodityDTO.getId()+"has been taken");
         }
         Commodity commodity = commodityRepository.save(CommodityConverter.converterCommodity(commodityDTO));
+        //从前端接收commodityDTO(数据传输对象),需要将DTO转换为(领域模型)Commodity才能保存到数据库
+        //输入操作：DTO → Entity
         return commodity.getId();
     }
 
@@ -47,5 +49,14 @@ public class CommodityServiceImpl implements CommodityService {
         }
         Commodity commodity = commodityRepository.save(commodityInDB);
         return  CommodityConverter.converterCommodity(commodity);
+    }
+    //get和update从数据库获取的是 Commodity实体
+    //需要将Entity转换为DTO才能返回给前端
+    //这是一个输出操作：Entity → DTO
+
+    @Override
+    public void deleteCommodityById(Long id) {
+        commodityRepository.findById(id).orElseThrow(() ->new IllegalStateException("id:" + id + "is not exist"));
+        commodityRepository.deleteById(id);
     }
 }

@@ -1,6 +1,5 @@
 package com.gym.mall.service;
 
-import com.gym.mall.dto.commodityDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +14,13 @@ public class Response<T> {
         Response<K> response=new Response<>();
         response.setData(data);
         response.setSuccess(true);
+        return response;
+    }
+
+    public static Response<String> newFail(String errorMsg){
+        Response<String> response=new Response<>();
+        response.setSuccess(false);
+        response.setMessage(errorMsg);
         return response;
     }
 
