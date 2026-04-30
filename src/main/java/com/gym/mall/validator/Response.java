@@ -1,4 +1,4 @@
-package com.gym.mall.service;
+package com.gym.mall.validator;
 
 import lombok.Getter;
 import lombok.Setter;

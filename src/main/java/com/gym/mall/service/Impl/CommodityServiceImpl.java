@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 @Service
-//标记一个类作为服务层（Service Layer）
+//标记一个类作为服务层
 public class CommodityServiceImpl implements CommodityService {
 
     @Autowired

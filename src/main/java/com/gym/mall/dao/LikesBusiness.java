@@ -1,0 +1,24 @@
+package com.gym.mall.dao;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name="like_business")
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class LikesBusiness extends BaseEntity{
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private long id;
+
+    private String businessName;
+
+    private String description;
+}
