@@ -10,12 +10,17 @@ public class RabbitmqService {
     @Autowired
     private AmqpTemplate amqpTemplate;
 
-    @Value("${rabbitmq.reading.exchange}")
+    @Value("${rabbitmq.commodity.exchange}")
     private String exchange;
 
-    @Value("${rabbitmq.reading.routingkey}")
+    @Value("${rabbitmq.commodity.routingkey}")
     private String routingkey;
 
+    /**
+     * 发送消息到 RabbitMQ
+     * @param type 消息对象，会自动序列化为 JSON 发送
+     * @param <T> 泛型，支持任意类型的消息对象
+     */
     public <T> void publishMessage(T type){
         amqpTemplate.convertAndSend(exchange, routingkey, type);
     }
