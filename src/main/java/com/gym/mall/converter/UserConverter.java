@@ -11,7 +11,7 @@ public class UserConverter {
         return User.builder()
                 .user_id(userDTO.getId())
                 .userName(userDTO.getUserName())
-                .password(userDTO.getPassword())
+                .salt(userDTO.getSalt())
                 .build();
     }
 }

@@ -30,6 +30,7 @@ public class CommodityServiceImpl implements CommodityService {
         //从前端接收commodityDTO(数据传输对象),需要将DTO转换为(领域模型)Commodity才能保存到数据库
         //输入操作：DTO → Entity
         return commodity.getId();
+        //返回新创建资源的 ID 是 RESTful 风格和业务开发中的标准做法
     }
 
     @Override
@@ -40,7 +41,7 @@ public class CommodityServiceImpl implements CommodityService {
 
     @Override
     public commodityDTO updateCommodityById(Long id, String name, String price) {
-            Commodity commodityInDB=commodityRepository.findById(id).orElseThrow(RuntimeException::new);
+        Commodity commodityInDB=commodityRepository.findById(id).orElseThrow(RuntimeException::new);
         if(StringUtils.hasLength(name) && !commodityInDB.getName().equals(name)){
             commodityInDB.setName(name);
         }
