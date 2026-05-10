@@ -21,14 +21,26 @@ public class LikesController {
 
     @PostMapping("/likes")
     public Response<Boolean> addLikeItem(@RequestBody LikesUserRecordDTO likesUserRecordDTO){
+        // 【核心安全改动】：不再相信前端传来的 userId，而是直接从 ThreadLocal (BaseContext) 中获取
+        // 这里的 ID 是保安（拦截器）从加密的 Token 中解析出来的，绝对真实可靠
+        Long currentUserId = BaseContext.getCurrentId();
+        likesUserRecordDTO.setUserId(currentUserId);
+        
+        // 校验参数合法性
         likesValidator.validateAddNewCommodity(likesUserRecordDTO);
+        
+        // 调用 Service 执行异步点赞逻辑
         return Response.newSuccess(likesService.addNewLikesRecord(likesUserRecordDTO));
     }
 
+    /**
+     * 获取当前登录用户的所有点赞记录
+     */
     @GetMapping("/likes/{businessId}")
     public Response<List<Long>> getMyLikes(@PathVariable Long businessId){
+        // 同样从 ThreadLocal 中获取当前用户 ID
         long userId = BaseContext.getCurrentId();
-        return Response.newSuccess(likesService.getMyLikes(businessId, userId));
+        return Response.newSuccess(likesService.getMyLikes(userId, businessId));
     }
 
     @GetMapping("/likes/count")

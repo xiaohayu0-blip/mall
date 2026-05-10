@@ -5,6 +5,7 @@ import com.gym.mall.converter.UserConverter;
 import com.gym.mall.dao.User;
 import com.gym.mall.dto.UserDTO;
 import com.gym.mall.service.UserService;
+import com.gym.mall.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -14,6 +15,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Override
     public long registerUser(UserDTO userDTO) {
@@ -36,13 +40,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(String userName, String password) {
+        // 1. 根据用户名查询数据库中的用户
         User user=userRepository.findByUserName(userName)
-                .orElseThrow(()->new IllegalArgumentException("userName:" + userName + " not found"));
+                .orElseThrow(()->new IllegalArgumentException("用户名:" + userName + " 不存在"));
 
+        // 2. 将前端传来的明文密码进行 MD5 加密（注意要加上数据库里存的盐值）
         String md5Password= DigestUtils.md5DigestAsHex((password+user.getSalt()).getBytes());
+        
+        // 3. 校验加密后的密码是否与数据库一致
         if(!md5Password.equals(user.getPassword())){
-            throw new IllegalArgumentException("username and password not match");
+            throw new IllegalArgumentException("用户名或密码错误");
         }
-        return md5Password;
+        
+        // 4. 登录成功，为该用户生成一个 JWT Token（会员证）
+        // 里面包含了用户 ID 和用户名，有效期由 JwtUtils 定义
+        String token = jwtUtils.getToken(user.getUser_id().toString(), user.getUserName());
+        
+        // 5. 返回 Token 给前端，前端后续请求都要带上它
+        return token;
     }
 }

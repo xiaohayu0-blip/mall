@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import java.util.List;
 import java.util.Set;
 
+import static com.gym.mall.Constants.LIKE_STATISTIC_KEY;
 import static com.gym.mall.Constants.LIKE_USER_KEY;
 
 @Service
@@ -73,8 +74,8 @@ public class LikesServiceImpl implements LikesService {
 
     @Override
     public Long getItemLikesCount(Long businessId, Long itemId) {
-        // 构建Redis缓存的key，格式为：LIKE_USER_KEY + businessId + ":" + itemId
-        String statisticKey = LIKE_USER_KEY+businessId+":"+itemId;
+        // 构建Redis缓存的key，格式为：LIKE_STATISTIC_KEY + businessId + ":" + itemId
+        String statisticKey = LIKE_STATISTIC_KEY+businessId+":"+itemId;
         // 从Redis缓存中获取点赞数
         Long count=(Long) redisTemplate.opsForValue().get(statisticKey);
         // 判断缓存是否命中

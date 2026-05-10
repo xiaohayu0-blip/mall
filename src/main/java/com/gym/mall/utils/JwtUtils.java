@@ -15,7 +15,7 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    @Value("jwt.token.secretKey")
+    @Value("${jwt.token.secretKey}")
     private String secretKey;
 
     public String getToken(String userId,String userName){
