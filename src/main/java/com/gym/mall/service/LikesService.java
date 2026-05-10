@@ -11,4 +11,6 @@ public interface LikesService {
     List<Long> getMyLikes(long userId, Long businessId);
 
     Long getItemLikesCount(Long businessId,Long itemId);
+
+    boolean hasLiked(long userId, long businessId, long itemId);
 }

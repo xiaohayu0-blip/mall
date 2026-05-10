@@ -31,8 +31,13 @@ public class LikesController {
         return Response.newSuccess(likesService.getMyLikes(businessId, userId));
     }
 
-    @GetMapping("/likes/{businessId}/{itemId}")
-    public Response<Long> getItemLikesCount(@PathVariable Long businessId, @PathVariable Long itemId){
+    @GetMapping("/likes/count")
+    public Response<Long> getItemLikesCount(@RequestParam Long businessId, @RequestParam Long itemId){
         return Response.newSuccess(likesService.getItemLikesCount(businessId, itemId));
+    }
+
+    @GetMapping("/likes/status")
+    public Response<Boolean> hasLiked(@RequestParam long userId, @RequestParam long businessId, @RequestParam long itemId){
+        return Response.newSuccess(likesService.hasLiked(userId, businessId, itemId));
     }
 }

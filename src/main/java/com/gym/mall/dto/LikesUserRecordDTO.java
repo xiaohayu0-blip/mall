@@ -1,19 +1,23 @@
 package com.gym.mall.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LikesUserRecordDTO {
 
-    private long id;
+    private Long id;
 
-    private long userId;
+    private Long userId;
 
-    private long businessId;
+    private Long businessId;
 
-    private long itemId;
+    private Long itemId;
 
-    private boolean likes;
+    private Boolean likes;
 }

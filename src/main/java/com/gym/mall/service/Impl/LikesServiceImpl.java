@@ -90,4 +90,23 @@ public class LikesServiceImpl implements LikesService {
         // 返回结果：如果数据库中没有记录则返回0，否则返回实际点赞数
         return likesStatistic==null?0L:likesStatistic.getLikeCount();
     }
+
+    @Override
+    public boolean hasLiked(long userId, long businessId, long itemId) {
+        String key = LIKE_USER_KEY + userId;
+        String value = businessId + ":" + itemId;
+
+        // Redis Set 的 SISMEMBER 操作：判断元素是否在集合中
+        // 时间复杂度 O(1)，极其高效
+        Boolean isMember = redisTemplate.opsForSet().isMember(key, value);
+        
+        if (Boolean.TRUE.equals(isMember)) {
+            log.info("check like status from redis: user {} has liked item {}", userId, itemId);
+            return true;
+        }
+
+        // 缓存没有，查数据库
+        log.info("check like status from db: user {} for item {}", userId, itemId);
+        return likesUserRecordRepository.findUserLikeRecord(userId, businessId, itemId).isPresent();
+    }
 }

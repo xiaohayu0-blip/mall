@@ -105,7 +105,7 @@ public class LikesMessageConsumer {
                     LikesStatistic likesStatistic=LikesStatistic.builder()
                             .businessId(likesUserRecordDTO.getBusinessId())
                             .itemId(likesUserRecordDTO.getItemId())
-                            .likeCount(1).build();
+                            .likeCount(1L).build();
 
                     // 保存到数据库
                     likesStatisticRepository.save(likesStatistic);

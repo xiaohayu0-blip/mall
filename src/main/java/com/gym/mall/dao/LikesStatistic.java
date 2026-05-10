@@ -16,12 +16,12 @@ public class LikesStatistic extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private long businessId;
+    private Long businessId;
 
-    private long itemId;
+    private Long itemId;
 
-    private long likeCount;
+    private Long likeCount;
 
 }

@@ -16,15 +16,13 @@ public class LikesUserRecord extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private long userId;
+    private Long userId;
 
-    private long businessId;
+    private Long businessId;
 
-    private long itemId;
+    private Long itemId;
 
-    private boolean likes;
-
-
+    private Boolean likes;
 }

@@ -14,7 +14,7 @@ public class LikesUserRecordConverter {
                 .id(likesUserRecordDTO.getId())
                 .businessId(likesUserRecordDTO.getBusinessId())
                 .itemId(likesUserRecordDTO.getItemId())
-                .likes(likesUserRecordDTO.isLikes())
+                .likes(likesUserRecordDTO.getLikes())
                 .userId(likesUserRecordDTO.getUserId())
                 .build();
     }
