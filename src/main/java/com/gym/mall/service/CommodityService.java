@@ -1,5 +1,7 @@
 package com.gym.mall.service;
 
+import com.gym.mall.dto.CommodityPageRequest;
+import com.gym.mall.dto.CommodityPageResponse;
 import com.gym.mall.dto.commodityDTO;
 
 public interface CommodityService {
@@ -8,7 +10,9 @@ public interface CommodityService {
 
     commodityDTO getCommodityById(Long commodityId);
 
-    commodityDTO updateCommodityById(Long id,String name,String price);
+    commodityDTO updateCommodityById(Long id, String name, String price, Long categoryId, String description, Integer stock);
 
     void deleteCommodityById(Long id);
+
+    CommodityPageResponse queryCommodities(CommodityPageRequest pageRequest);
 }

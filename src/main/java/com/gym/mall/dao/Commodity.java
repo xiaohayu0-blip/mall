@@ -1,29 +1,75 @@
 package com.gym.mall.dao;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
-@Setter
-@Getter
 @Entity
-//标记为持久化实体：告诉 JPA 这个类对应数据库中的一张表
-//启用JPA功能：使得这个类可以使用其他 JPA 注解（如 @Id、@Column 等）
-@Table(name="mall")
-//指定具体的表名
+@Table(name = "commodity")
 public class Commodity {
     @Id
-    //标记主键字段
-    @Column(name="id")
-    //指定列名和约束
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    //指定主键生成策略
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name="price")
+    @Column(name = "price")
     private String price;
 
+    @Column(name = "category_id")
+    private Long categoryId;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "stock")
+    private Integer stock;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
 }
