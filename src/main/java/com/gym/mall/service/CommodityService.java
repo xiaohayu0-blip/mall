@@ -4,6 +4,8 @@ import com.gym.mall.dto.CommodityPageRequest;
 import com.gym.mall.dto.CommodityPageResponse;
 import com.gym.mall.dto.commodityDTO;
 
+import java.util.List;
+
 public interface CommodityService {
 
     Long addCommodity(commodityDTO commodityDTO);
@@ -15,4 +17,13 @@ public interface CommodityService {
     void deleteCommodityById(Long id);
 
     CommodityPageResponse queryCommodities(CommodityPageRequest pageRequest);
+
+    commodityDTO bindTagsToCommodity(Long commodityId, List<Long> tagIds);
+
+    void unbindTagFromCommodity(Long commodityId, Long tagId);
+
+    List<commodityDTO> getCommoditiesByTagId(Long tagId);
+
+    CommodityPageResponse queryCommoditiesByTags(List<Long> tagIds, Integer page, Integer pageSize);
+
 }

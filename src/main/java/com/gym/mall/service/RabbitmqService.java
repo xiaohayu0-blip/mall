@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RabbitmqService {
+
     @Autowired
     private AmqpTemplate amqpTemplate;
+    //Spring AMQP 提供的消息操作模板,Spring 对 RabbitMQ 的封装
 
     @Value("${rabbitmq.commodity.exchange}")
     private String exchange;

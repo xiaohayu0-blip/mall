@@ -1,11 +1,14 @@
 package com.gym.mall.service.Impl;
 
+import com.gym.mall.Repository.*;
 import com.gym.mall.converter.CommodityConverter;
-import com.gym.mall.Repository.CategoryRepository;
+import com.gym.mall.converter.CommodityTagConverter;
 import com.gym.mall.dao.Commodity;
-import com.gym.mall.Repository.CommodityRepository;
+import com.gym.mall.dao.CommodityTag;
+import com.gym.mall.dao.Tag;
 import com.gym.mall.dto.CommodityPageRequest;
 import com.gym.mall.dto.CommodityPageResponse;
+import com.gym.mall.dto.CommodityTagDTO;
 import com.gym.mall.dto.commodityDTO;
 import com.gym.mall.service.CommodityService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +19,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -33,10 +40,16 @@ public class CommodityServiceImpl implements CommodityService {
     private CommodityRepository commodityRepository;
 
     @Autowired
+    private CommodityTagRepository commodityTagRepository;
+
+    @Autowired
     private CategoryRepository categoryRepository;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     @Override
     public Long addCommodity(commodityDTO commodityDTO) {
@@ -144,6 +157,128 @@ public class CommodityServiceImpl implements CommodityService {
                 .total(commodityPage.getTotalElements())
                 .page(pageRequest.getPage())
                 .pageSize(pageSize)
+                .totalPages(commodityPage.getTotalPages())
+                .build();
+    }
+    @Override
+    @Transactional
+    //声明式事务管理
+    //保证这个方法里的所有数据库操作要么全部成功，要么全部失败回滚
+    public commodityDTO bindTagsToCommodity(Long commodityId,List<Long> tagIds){
+        Commodity commodity = commodityRepository.findById(commodityId)
+                .orElseThrow(()->new RuntimeException("商品不存在:"+commodityId));
+
+        for(Long tagId:tagIds){
+            Tag tag=tagRepository.findById(tagId)
+                    .orElseThrow(()->new RuntimeException("标签不存在:"+tagId));
+
+            boolean exits=commodityTagRepository.existsByCommodityIdAndTagId(commodityId,tagId);
+            if(!exits){
+                CommodityTag commodityTag=CommodityTag.builder()
+                        .commodityId(commodityId)
+                        .tagId(tagId)
+                        .tagGroupId(tag.getTagGroupId())
+                        .build();
+                commodityTagRepository.save(commodityTag);
+                log.info("绑定标签到商品,commodityId:{},tagId:{}",commodityId,tagId);
+            }
+        }
+
+        redisTemplate.delete(COMMODITY_KEY+commodityId);
+        //删除 Redis 中该商品的缓存，防止返回旧数据。
+
+        return getCommodityById(commodityId);
+    }
+
+    @Override
+    public void unbindTagFromCommodity(Long commodityId, Long tagId) {
+        Commodity commodity = commodityRepository.findById(commodityId)
+                .orElseThrow(() -> new RuntimeException("商品不存在:" + commodityId));
+
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("标签不存在:" + tagId));
+
+        commodityTagRepository.deleteByCommodityIdAndTagId(commodityId, tagId);
+        log.info("解绑标签,commodityId:{},tagId:{}", commodityId, tagId);
+
+        redisTemplate.delete(COMMODITY_KEY + commodityId);
+
+    }
+
+    @Override
+    public List<commodityDTO> getCommoditiesByTagId(Long tagId) {
+
+        List<CommodityTagView> views = commodityRepository.findCommoditiesWithTags(tagId);
+
+        Map<Long, commodityDTO> dtoMap = new HashMap<>();
+
+        for (CommodityTagView view : views) {
+
+            commodityDTO dto = dtoMap.computeIfAbsent(
+                    view.getCommodityId(),
+                    id -> new commodityDTO(
+                            view.getCommodityId(),
+                            view.getCommodityName(),
+                            view.getCategoryId(),
+                            view.getCategoryName(),
+                            new ArrayList<>()
+                    )
+            );
+
+            if (view.getTagId() != null) {
+                dto.getTags().add(new CommodityTagDTO(view.getTagId(), view.getTagName()));
+            }
+        }
+
+        return new ArrayList<>(dtoMap.values());
+    }
+
+    @Override
+    public CommodityPageResponse queryCommoditiesByTags(List<Long> tagIds, Integer page, Integer pageSize) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return new CommodityPageResponse();
+        }
+
+        List<Long> commodityIds = commodityTagRepository.findCommodityIdsByTagIds(tagIds);
+
+        if (commodityIds.isEmpty()) {
+            return new CommodityPageResponse();
+        }
+
+        int pageNum = page != null && page > 0 ? page - 1 : 0;
+        int size = pageSize != null && pageSize > 0 ? pageSize : 10;
+
+        Pageable pageable = PageRequest.of(pageNum, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        Page<Commodity> commodityPage = commodityRepository.findAllByIdIn(commodityIds, pageable);
+
+        List<commodityDTO> dtoList = commodityPage.getContent().stream()
+                .map(commodity -> {
+                    commodityDTO dto = CommodityConverter.converterCommodity(commodity);
+                    if (dto.getCategoryId() != null) {
+                        categoryRepository.findById(dto.getCategoryId())
+                                .ifPresent(category -> dto.setCategoryName(category.getName()));
+                    }
+
+                    List<CommodityTag> tags = commodityTagRepository.findByCommodityId(commodity.getId());
+                    if (!tags.isEmpty()) {
+                        List<Long> existingTagIds = tags.stream()
+                                .map(CommodityTag::getTagId)
+                                .collect(Collectors.toList());
+                        List<Tag> tagList = tagRepository.findByIdIn(existingTagIds);
+                        List<CommodityTagDTO> tagDTOs = CommodityTagConverter.convertToList(tags, tagList);
+                        dto.setTags(tagDTOs);
+                    }
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return CommodityPageResponse.builder()
+                .records(dtoList)
+                .total(commodityPage.getTotalElements())
+                .page(page)
+                .pageSize(size)
                 .totalPages(commodityPage.getTotalPages())
                 .build();
     }

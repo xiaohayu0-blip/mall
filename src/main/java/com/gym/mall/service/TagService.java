@@ -13,4 +13,10 @@ public interface TagService {
     TagDTO getTagDTOByTagId(long tagId);
 
     Map<TagGroupDTO, List<TagDTO>> getAllTags();
+
+    List<TagDTO> getTagsByTagGroupId(long tagGroupId);
+
+    void deleteTag(long tagId);
+
+    TagDTO updateTag(long tagId,String tagName);
 }
