@@ -1,6 +1,6 @@
 package com.gym.mall.validator;
 
-import com.gym.mall.dto.LikesUserRecordDTO;
+import com.gym.mall.domain.dto.LikesUserRecordDTO;
 import org.springframework.stereotype.Component;
 
 @Component

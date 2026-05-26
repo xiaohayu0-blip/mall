@@ -1,6 +1,6 @@
 package com.gym.mall.Repository;
 
-import com.gym.mall.dao.Commodity;
+import com.gym.mall.domain.entity.Commodity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,7 +29,7 @@ public interface CommodityRepository extends JpaRepository<Commodity,Long>, JpaS
                c.categoryId  AS categoryId,
                cat.name      AS categoryName,
                t.id          AS tagId,
-               t.name        AS tagName
+               t.tagName        AS tagName
         FROM Commodity c
         LEFT JOIN Category cat ON c.categoryId = cat.id
         LEFT JOIN CommodityTag ct ON c.id = ct.commodityId

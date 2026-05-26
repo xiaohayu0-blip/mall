@@ -1,7 +1,7 @@
 package com.gym.mall.converter;
 
-import com.gym.mall.dao.LikesUserRecord;
-import com.gym.mall.dto.LikesUserRecordDTO;
+import com.gym.mall.domain.entity.LikesUserRecord;
+import com.gym.mall.domain.dto.LikesUserRecordDTO;
 
 public class LikesUserRecordConverter {
 

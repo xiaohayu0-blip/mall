@@ -1,6 +1,6 @@
 package com.gym.mall.controller;
 
-import com.gym.mall.dto.CategoryDTO;
+import com.gym.mall.domain.dto.CategoryDTO;
 import com.gym.mall.service.CategoryService;
 import com.gym.mall.validator.Response;
 import org.springframework.beans.factory.annotation.Autowired;

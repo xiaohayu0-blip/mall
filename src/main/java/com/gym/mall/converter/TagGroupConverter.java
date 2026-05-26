@@ -1,8 +1,8 @@
 package com.gym.mall.converter;
 
 
-import com.gym.mall.dao.TagGroup;
-import com.gym.mall.dto.TagGroupDTO;
+import com.gym.mall.domain.entity.TagGroup;
+import com.gym.mall.domain.dto.TagGroupDTO;
 
 public class TagGroupConverter {
 

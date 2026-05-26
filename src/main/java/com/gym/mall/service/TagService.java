@@ -1,7 +1,7 @@
 package com.gym.mall.service;
 
-import com.gym.mall.dto.TagDTO;
-import com.gym.mall.dto.TagGroupDTO;
+import com.gym.mall.domain.dto.TagDTO;
+import com.gym.mall.domain.dto.TagGroupDTO;
 
 import java.util.List;
 import java.util.Map;

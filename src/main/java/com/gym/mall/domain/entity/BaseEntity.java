@@ -1,4 +1,4 @@
-package com.gym.mall.dao;
+package com.gym.mall.domain.entity;
 
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;

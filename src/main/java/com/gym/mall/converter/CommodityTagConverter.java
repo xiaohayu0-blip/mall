@@ -1,8 +1,8 @@
 package com.gym.mall.converter;
 
-import com.gym.mall.dao.CommodityTag;
-import com.gym.mall.dao.Tag;
-import com.gym.mall.dto.CommodityTagDTO;
+import com.gym.mall.domain.entity.CommodityTag;
+import com.gym.mall.domain.entity.Tag;
+import com.gym.mall.domain.dto.CommodityTagDTO;
 
 import java.util.ArrayList;
 import java.util.List;

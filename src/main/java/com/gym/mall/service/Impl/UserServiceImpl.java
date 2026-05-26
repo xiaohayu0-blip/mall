@@ -2,8 +2,8 @@ package com.gym.mall.service.Impl;
 
 import com.gym.mall.Repository.UserRepository;
 import com.gym.mall.converter.UserConverter;
-import com.gym.mall.dao.User;
-import com.gym.mall.dto.UserDTO;
+import com.gym.mall.domain.entity.User;
+import com.gym.mall.domain.dto.UserDTO;
 import com.gym.mall.service.UserService;
 import com.gym.mall.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;

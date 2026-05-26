@@ -1,5 +1,5 @@
 package com.gym.mall.Repository;
-import com.gym.mall.dao.CommodityTag;
+import com.gym.mall.domain.entity.CommodityTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
 package com.gym.mall.service;
 
-import com.gym.mall.dto.CategoryDTO;
+import com.gym.mall.domain.dto.CategoryDTO;
 
 import java.util.List;
 

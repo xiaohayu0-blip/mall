@@ -1,9 +1,9 @@
 package com.gym.mall.service.Impl;
 
 import com.gym.mall.converter.CategoryConverter;
-import com.gym.mall.dao.Category;
+import com.gym.mall.domain.entity.Category;
 import com.gym.mall.Repository.CategoryRepository;
-import com.gym.mall.dto.CategoryDTO;
+import com.gym.mall.domain.dto.CategoryDTO;
 import com.gym.mall.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

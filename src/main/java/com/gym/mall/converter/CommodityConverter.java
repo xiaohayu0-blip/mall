@@ -1,7 +1,7 @@
 package com.gym.mall.converter;
 
-import com.gym.mall.dao.Commodity;
-import com.gym.mall.dto.commodityDTO;
+import com.gym.mall.domain.entity.Commodity;
+import com.gym.mall.domain.dto.commodityDTO;
 
 public class CommodityConverter {
     public static commodityDTO converterCommodity(Commodity commodity) {

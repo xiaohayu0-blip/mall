@@ -1,6 +1,6 @@
 package com.gym.mall.controller;
 
-import com.gym.mall.dto.LikesUserRecordDTO;
+import com.gym.mall.domain.dto.LikesUserRecordDTO;
 import com.gym.mall.service.LikesService;
 import com.gym.mall.utils.BaseContext;
 import com.gym.mall.validator.LikesValidator;

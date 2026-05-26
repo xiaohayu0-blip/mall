@@ -1,7 +1,7 @@
 package com.gym.mall.converter;
 
-import com.gym.mall.dao.Category;
-import com.gym.mall.dto.CategoryDTO;
+import com.gym.mall.domain.entity.Category;
+import com.gym.mall.domain.dto.CategoryDTO;
 
 public class CategoryConverter {
 

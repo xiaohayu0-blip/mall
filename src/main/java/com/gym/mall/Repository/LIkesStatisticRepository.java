@@ -1,7 +1,6 @@
 package com.gym.mall.Repository;
 
-import com.gym.mall.dao.LikesStatistic;
-import com.gym.mall.dto.LikesUserRecordDTO;
+import com.gym.mall.domain.entity.LikesStatistic;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

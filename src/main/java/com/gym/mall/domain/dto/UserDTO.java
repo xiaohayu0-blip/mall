@@ -1,4 +1,4 @@
-package com.gym.mall.dto;
+package com.gym.mall.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

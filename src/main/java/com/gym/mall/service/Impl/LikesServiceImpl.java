@@ -2,9 +2,9 @@ package com.gym.mall.service.Impl;
 
 import com.gym.mall.Repository.LIkesStatisticRepository;
 import com.gym.mall.Repository.LikesUserRecordRepository;
-import com.gym.mall.dao.LikesStatistic;
-import com.gym.mall.dao.LikesUserRecord;
-import com.gym.mall.dto.LikesUserRecordDTO;
+import com.gym.mall.domain.entity.LikesStatistic;
+import com.gym.mall.domain.entity.LikesUserRecord;
+import com.gym.mall.domain.dto.LikesUserRecordDTO;
 import com.gym.mall.service.LikesService;
 import com.gym.mall.service.RabbitmqService;
 import lombok.extern.slf4j.Slf4j;

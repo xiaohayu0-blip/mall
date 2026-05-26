@@ -1,6 +1,6 @@
 package com.gym.mall.service;
 
-import com.gym.mall.dto.LikesUserRecordDTO;
+import com.gym.mall.domain.dto.LikesUserRecordDTO;
 
 import java.util.List;
 

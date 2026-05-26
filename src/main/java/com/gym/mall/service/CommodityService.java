@@ -1,8 +1,8 @@
 package com.gym.mall.service;
 
-import com.gym.mall.dto.CommodityPageRequest;
-import com.gym.mall.dto.CommodityPageResponse;
-import com.gym.mall.dto.commodityDTO;
+import com.gym.mall.domain.dto.CommodityPageRequest;
+import com.gym.mall.domain.dto.CommodityPageResponse;
+import com.gym.mall.domain.dto.commodityDTO;
 
 import java.util.List;
 

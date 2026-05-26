@@ -1,7 +1,7 @@
 package com.gym.mall.converter;
 
-import com.gym.mall.dao.User;
-import com.gym.mall.dto.UserDTO;
+import com.gym.mall.domain.entity.User;
+import com.gym.mall.domain.dto.UserDTO;
 
 public class UserConverter {
     public static User converToUser(UserDTO userDTO) {

@@ -17,10 +17,11 @@ public class Response<T> {
         return response;
     }
 
-    public static Response<String> newFail(String errorMsg){
-        Response<String> response=new Response<>();
+    public static <K> Response<K> newFail(String errorMsg) {
+        Response<K> response = new Response<>();
         response.setSuccess(false);
         response.setMessage(errorMsg);
+        response.setData(null);
         return response;
     }
 

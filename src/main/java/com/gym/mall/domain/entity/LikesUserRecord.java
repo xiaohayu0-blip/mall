@@ -1,4 +1,4 @@
-package com.gym.mall.dao;
+package com.gym.mall.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,20 +8,21 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@Table(name="likes_statistic")
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name="likes_user_record")
 @Builder
-public class LikesStatistic extends BaseEntity{
+@NoArgsConstructor
+@AllArgsConstructor
+public class LikesUserRecord extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long userId;
+
     private Long businessId;
 
     private Long itemId;
 
-    private Long likeCount;
-
+    private Boolean likes;
 }

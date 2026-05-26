@@ -1,7 +1,7 @@
 package com.gym.mall.converter;
 
-import com.gym.mall.dao.Tag;
-import com.gym.mall.dto.TagDTO;
+import com.gym.mall.domain.entity.Tag;
+import com.gym.mall.domain.dto.TagDTO;
 
 public class TagConverter {
     public static Tag convertToTag(TagDTO tagDTO) {

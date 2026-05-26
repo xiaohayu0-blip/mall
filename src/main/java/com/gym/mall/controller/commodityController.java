@@ -1,8 +1,8 @@
 package com.gym.mall.controller;
 
-import com.gym.mall.dto.CommodityPageRequest;
-import com.gym.mall.dto.CommodityPageResponse;
-import com.gym.mall.dto.commodityDTO;
+import com.gym.mall.domain.dto.CommodityPageRequest;
+import com.gym.mall.domain.dto.CommodityPageResponse;
+import com.gym.mall.domain.dto.commodityDTO;
 import com.gym.mall.service.CommodityService;
 import com.gym.mall.validator.Response;
 import org.springframework.beans.factory.annotation.Autowired;

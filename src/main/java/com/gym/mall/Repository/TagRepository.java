@@ -1,6 +1,6 @@
 package com.gym.mall.Repository;
 
-import com.gym.mall.dao.Tag;
+import com.gym.mall.domain.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

@@ -1,7 +1,7 @@
 package com.gym.mall.controller;
 
-import com.gym.mall.dto.TagDTO;
-import com.gym.mall.dto.TagGroupDTO;
+import com.gym.mall.domain.dto.TagDTO;
+import com.gym.mall.domain.dto.TagGroupDTO;
 import com.gym.mall.validator.Response;
 import com.gym.mall.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;

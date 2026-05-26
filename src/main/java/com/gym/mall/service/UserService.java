@@ -1,6 +1,6 @@
 package com.gym.mall.service;
 
-import com.gym.mall.dto.UserDTO;
+import com.gym.mall.domain.dto.UserDTO;
 
 public interface UserService {
 

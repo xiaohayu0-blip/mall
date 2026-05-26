@@ -1,4 +1,4 @@
-package com.gym.mall.dto;
+package com.gym.mall.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO {
+public class LikesUserRecordDTO {
+
     private Long id;
-    private String name;
-    private String description;
-    private Integer sortOrder;
+
+    private Long userId;
+
+    private Long businessId;
+
+    private Long itemId;
+
+    private Boolean likes;
 }
