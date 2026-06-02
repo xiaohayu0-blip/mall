@@ -27,5 +27,4 @@ public class User extends BaseEntity{
 
     private String salt;
 
-
 }

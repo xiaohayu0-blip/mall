@@ -10,6 +10,7 @@ import com.gym.mall.domain.dto.CommodityPageRequest;
 import com.gym.mall.domain.dto.CommodityPageResponse;
 import com.gym.mall.domain.dto.CommodityTagDTO;
 import com.gym.mall.domain.dto.commodityDTO;
+import com.gym.mall.service.BloomFilterService;
 import com.gym.mall.service.CommodityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,9 @@ public class CommodityServiceImpl implements CommodityService {
     @Autowired
     private TagRepository tagRepository;
 
+    @Autowired
+    private BloomFilterService bloomFilterService;
+
     @Override
     public Long addCommodity(commodityDTO commodityDTO) {
         List<Commodity> commodityList = commodityRepository.findByName(commodityDTO.getName());
@@ -58,11 +62,19 @@ public class CommodityServiceImpl implements CommodityService {
             throw new IllegalStateException("id" + commodityDTO.getId() + "has been taken");
         }
         Commodity commodity = commodityRepository.save(CommodityConverter.converterCommodity(commodityDTO));
+        bloomFilterService.addCommodity(commodity.getId());
+        log.info("新增商品并添加到布隆过滤器，商品ID: {}", commodity.getId());
+
         return commodity.getId();
     }
 
     @Override
     public commodityDTO getCommodityById(Long commodityId) {
+        if (!bloomFilterService.mightContainCommodity(commodityId)) {
+            log.warn("商品ID不存在（布隆过滤器拦截）: {}", commodityId);
+            throw new RuntimeException("商品不存在: " + commodityId);
+        }
+
         String key = COMMODITY_KEY + commodityId;
 
         commodityDTO cachedCommodity = (commodityDTO) redisTemplate.opsForValue().get(key);
@@ -118,6 +130,9 @@ public class CommodityServiceImpl implements CommodityService {
 
         redisTemplate.delete(COMMODITY_KEY + id);
         log.info("delete commodity and delete cache, id: {}", id);
+
+        bloomFilterService.initCommodityBloomFilter();
+        log.info("删除商品后重新初始化布隆过滤器，商品ID: {}", id);
     }
 
     @Override
