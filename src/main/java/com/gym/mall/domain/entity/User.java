@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-//自动生成包含所有字段的构造方法。
 public class User extends BaseEntity{
     @Id
     @Column(name="id")
@@ -27,4 +26,7 @@ public class User extends BaseEntity{
 
     private String salt;
 
+    /** 用户角色：ADMIN（管理员）/ USER（普通用户） */
+    @Column(name = "role", nullable = false)
+    private String role = "USER";
 }

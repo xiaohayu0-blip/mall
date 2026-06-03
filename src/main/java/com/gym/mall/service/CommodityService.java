@@ -14,6 +14,8 @@ public interface CommodityService {
 
     commodityDTO updateCommodityById(Long id, String name, String price, Long categoryId, String description, Integer stock);
 
+    commodityDTO updateCommodityById(Long id, String name, String price, Long categoryId, String description, Integer stock, Integer status);
+
     void deleteCommodityById(Long id);
 
     CommodityPageResponse queryCommodities(CommodityPageRequest pageRequest);

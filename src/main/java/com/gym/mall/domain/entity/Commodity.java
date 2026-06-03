@@ -25,6 +25,11 @@ public class Commodity {
     @Column(name = "stock")
     private Integer stock;
 
+    /** 商品状态：1=上架，0=下架 */
+    @Column(name = "status", nullable = false)
+    private Integer status = 1;
+
+    // getters and setters
     public Long getId() {
         return id;
     }
@@ -71,5 +76,13 @@ public class Commodity {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

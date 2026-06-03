@@ -3,6 +3,7 @@ package com.gym.mall.controller;
 import com.gym.mall.domain.dto.CommodityPageRequest;
 import com.gym.mall.domain.dto.CommodityPageResponse;
 import com.gym.mall.domain.dto.commodityDTO;
+import com.gym.mall.interceptor.AdminOnly;
 import com.gym.mall.service.CommodityService;
 import com.gym.mall.validator.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ public class commodityController {
     @Autowired
     private CommodityService commodityService;
 
+    @AdminOnly
     @PostMapping("/commodity")
     public Response<Long> addCommodity(@RequestBody commodityDTO commodityDTO){
         return Response.newSuccess(commodityService.addCommodity(commodityDTO));
@@ -38,16 +40,19 @@ public class commodityController {
         return Response.newSuccess(commodityService.queryCommodities(pageRequest));
     }
 
+    @AdminOnly
     @PutMapping("/commodity/{id}")
     public Response<commodityDTO> updateCommodityById(@PathVariable long id,
                                                       @RequestParam(required = false) String name,
                                                       @RequestParam(required= false) String price,
                                                       @RequestParam(required = false) Long categoryId,
                                                       @RequestParam(required = false) String description,
-                                                      @RequestParam(required = false) Integer stock){
-        return Response.newSuccess(commodityService.updateCommodityById(id, name, price, categoryId, description, stock));
+                                                      @RequestParam(required = false) Integer stock,
+                                                      @RequestParam(required = false) Integer status){
+        return Response.newSuccess(commodityService.updateCommodityById(id, name, price, categoryId, description, stock, status));
     }
 
+    @AdminOnly
     @DeleteMapping("/commodity/{id}")
     public Response<String> deleteCommodityById(@PathVariable Long id){
         try {
@@ -56,5 +61,15 @@ public class commodityController {
         } catch (Exception e) {
             return Response.newFail("删除失败");
         }
+    }
+
+    /**
+     * 切换商品上架/下架状态
+     */
+    @AdminOnly
+    @PutMapping("/commodity/{id}/status")
+    public Response<commodityDTO> toggleCommodityStatus(@PathVariable Long id,
+                                                        @RequestParam Integer status) {
+        return Response.newSuccess(commodityService.updateCommodityById(id, null, null, null, null, null, status));
     }
 }

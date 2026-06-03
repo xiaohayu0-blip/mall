@@ -15,6 +15,7 @@ public class CommodityConverter {
                 .categoryId(commodity.getCategoryId())
                 .description(commodity.getDescription())
                 .stock(commodity.getStock())
+                .status(commodity.getStatus())
                 .build();
     }
 
@@ -29,6 +30,7 @@ public class CommodityConverter {
         commodity.setCategoryId(commodityDTO.getCategoryId());
         commodity.setDescription(commodityDTO.getDescription());
         commodity.setStock(commodityDTO.getStock() != null ? commodityDTO.getStock() : 0);
+        commodity.setStatus(commodityDTO.getStatus() != null ? commodityDTO.getStatus() : 1);
         return commodity;
     }
 }

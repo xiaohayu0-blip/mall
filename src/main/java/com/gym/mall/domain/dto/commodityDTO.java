@@ -20,6 +20,7 @@ public class commodityDTO {
     private String categoryName;
     private String description;
     private Integer stock;
+    private Integer status;
     private List<CommodityTagDTO> tags;
 
     public <E> commodityDTO(Long commodityId, String commodityName, Long categoryId, String categoryName, ArrayList<E> es) {

@@ -52,9 +52,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("用户名或密码错误");
         }
         
-        // 4. 登录成功，为该用户生成一个 JWT Token（会员证）
-        // 里面包含了用户 ID 和用户名，有效期由 JwtUtils 定义
-        String token = jwtUtils.getToken(user.getUser_id().toString(), user.getUserName());
+        // 4. 登录成功，为该用户生成一个 JWT Token
+        String token = jwtUtils.getToken(user.getUser_id().toString(), user.getUserName(), user.getRole());
         
         // 5. 返回 Token 给前端，前端后续请求都要带上它
         return token;

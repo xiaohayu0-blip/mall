@@ -48,15 +48,31 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
             // 解析 Token，如果 Token 过期或被篡改，这里会抛出异常
             Map<String, String> claims = jwtUtils.parseToken(token);
             
-            // 从解析出的数据中获取用户 ID
+            // 从解析出的数据中获取用户 ID 和角色
             Long userId = Long.valueOf(claims.get("userId"));
-            log.info("JWT 校验通过，当前登录用户 ID：{}", userId);
-            
-            // 3. 将解析出的用户 ID 存入 ThreadLocal (BaseContext)
-            // 这样在后续的 Controller、Service 层中，可以通过 BaseContext.getCurrentId() 随时获取当前是谁在操作
+            String role = claims.get("role");
+            log.info("JWT 校验通过，当前登录用户 ID：{}，角色：{}", userId, role);
+
+            // 3. 将解析出的用户 ID 和角色存入 ThreadLocal
             BaseContext.setCurrentId(userId);
-            
-            // 4. 校验通过，允许请求继续向下执行
+            BaseContext.setCurrentRole(role);
+
+            // 4. 校验 @AdminOnly 权限注解
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            AdminOnly adminOnly = handlerMethod.getMethodAnnotation(AdminOnly.class);
+            if (adminOnly == null) {
+                // 尝试从类级别获取
+                adminOnly = handlerMethod.getBeanType().getAnnotation(AdminOnly.class);
+            }
+            if (adminOnly != null && !"ADMIN".equals(role)) {
+                log.warn("非管理员访问受限接口, userId: {}, role: {}", userId, role);
+                response.setStatus(403);
+                response.getWriter().write("{\"success\":false,\"message\":\"" + adminOnly.message() + "\"}");
+                response.setContentType("application/json;charset=UTF-8");
+                return false;
+            }
+
+            // 5. 校验通过，允许请求继续向下执行
             return true;
         } catch (Exception ex) {
             // 5. 校验失败（Token 错误、过期等）

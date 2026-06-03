@@ -118,8 +118,8 @@ public class LikesMessageConsumer {
                 likesUserRecordDTO.getItemId());
     }
     private void doUnLikeAction(LikesUserRecord likesUserRecord) {
-        likesUserRecord.setLikes(false);
-        likesUserRecordRepository.save(likesUserRecord);
+        // 物理删除点赞记录，避免下次点赞时唯一键冲突
+        likesUserRecordRepository.delete(likesUserRecord);
 
         String likesStatisticKey = LIKE_STATISTIC_KEY + likesUserRecord.getBusinessId() + ":" + likesUserRecord.getItemId();
         likesStatisticRepository.findByBusinessIdAndItemId(likesUserRecord.getBusinessId(),

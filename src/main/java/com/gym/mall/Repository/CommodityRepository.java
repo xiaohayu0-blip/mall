@@ -23,6 +23,15 @@ public interface CommodityRepository extends JpaRepository<Commodity,Long>, JpaS
 
     Page<Commodity> findByNameContainingAndCategoryId(String name, Long categoryId, Pageable pageable);
 
+    // Status-filtered queries for regular users
+    Page<Commodity> findByStatus(Integer status, Pageable pageable);
+
+    Page<Commodity> findByNameContainingAndStatus(String name, Integer status, Pageable pageable);
+
+    Page<Commodity> findByCategoryIdAndStatus(Long categoryId, Integer status, Pageable pageable);
+
+    Page<Commodity> findByNameContainingAndCategoryIdAndStatus(String name, Long categoryId, Integer status, Pageable pageable);
+
     @Query("""
         SELECT c.id          AS commodityId,
                c.name        AS commodityName,
@@ -42,5 +51,10 @@ public interface CommodityRepository extends JpaRepository<Commodity,Long>, JpaS
             "WHERE id IN :ids"
             , nativeQuery = true)
     Page<Commodity> findAllByIdIn(List<Long> ids, Pageable pageable);
+
+    @Query(value = "SELECT * FROM commodity " +
+            "WHERE id IN :ids AND status = 1"
+            , nativeQuery = true)
+    Page<Commodity> findAllByIdInAndStatus(List<Long> ids, Pageable pageable);
 
 }

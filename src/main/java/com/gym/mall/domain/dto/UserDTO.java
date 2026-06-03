@@ -10,7 +10,6 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//自动生成一个无参构造函数
 public class UserDTO {
 
     private Long id;
@@ -18,6 +17,8 @@ public class UserDTO {
     private String userName;
 
     private String password;
+
+    private String role;
 
     @JsonIgnore
     private String salt= UUID.randomUUID().toString().replaceAll("-", "");

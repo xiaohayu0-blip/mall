@@ -12,6 +12,7 @@ public class UserConverter {
                 .user_id(userDTO.getId())
                 .userName(userDTO.getUserName())
                 .salt(userDTO.getSalt())
+                .role("USER")
                 .build();
     }
 }

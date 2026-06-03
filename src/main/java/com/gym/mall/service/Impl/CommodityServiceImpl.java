@@ -12,6 +12,7 @@ import com.gym.mall.domain.dto.CommodityTagDTO;
 import com.gym.mall.domain.dto.commodityDTO;
 import com.gym.mall.service.BloomFilterService;
 import com.gym.mall.service.CommodityService;
+import com.gym.mall.utils.BaseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -85,6 +86,13 @@ public class CommodityServiceImpl implements CommodityService {
 
         log.info("get commodity from db, id: {}", commodityId);
         Commodity commodity = commodityRepository.findById(commodityId).orElseThrow(RuntimeException::new);
+
+        // 普通用户看不到下架商品
+        String role = BaseContext.getCurrentRole();
+        if ("USER".equals(role) && commodity.getStatus() != null && commodity.getStatus() == 0) {
+            throw new RuntimeException("商品不存在: " + commodityId);
+        }
+
         commodityDTO dto = CommodityConverter.converterCommodity(commodity);
 
         if (dto.getCategoryId() != null) {
@@ -99,6 +107,10 @@ public class CommodityServiceImpl implements CommodityService {
 
     @Override
     public commodityDTO updateCommodityById(Long id, String name, String price, Long categoryId, String description, Integer stock) {
+        return updateCommodityById(id, name, price, categoryId, description, stock, null);
+    }
+
+    public commodityDTO updateCommodityById(Long id, String name, String price, Long categoryId, String description, Integer stock, Integer status) {
         Commodity commodityInDB = commodityRepository.findById(id).orElseThrow(RuntimeException::new);
         if (StringUtils.hasLength(name)) {
             commodityInDB.setName(name);
@@ -114,6 +126,9 @@ public class CommodityServiceImpl implements CommodityService {
         }
         if (stock != null) {
             commodityInDB.setStock(stock);
+        }
+        if (status != null) {
+            commodityInDB.setStatus(status);
         }
         Commodity commodity = commodityRepository.save(commodityInDB);
 
@@ -145,15 +160,31 @@ public class CommodityServiceImpl implements CommodityService {
 
         String keyword = pageRequest.getKeyword();
         Long categoryId = pageRequest.getCategoryId();
+        String role = BaseContext.getCurrentRole();
 
-        if (StringUtils.hasLength(keyword) && categoryId != null) {
-            commodityPage = commodityRepository.findByNameContainingAndCategoryId(keyword, categoryId, pageable);
-        } else if (StringUtils.hasLength(keyword)) {
-            commodityPage = commodityRepository.findByNameContaining(keyword, pageable);
-        } else if (categoryId != null) {
-            commodityPage = commodityRepository.findByCategoryId(categoryId, pageable);
+        // 普通用户只能看到上架商品（status=1），管理员可以看到全部
+        boolean isUser = "USER".equals(role);
+
+        if (isUser) {
+            if (StringUtils.hasLength(keyword) && categoryId != null) {
+                commodityPage = commodityRepository.findByNameContainingAndCategoryIdAndStatus(keyword, categoryId, 1, pageable);
+            } else if (StringUtils.hasLength(keyword)) {
+                commodityPage = commodityRepository.findByNameContainingAndStatus(keyword, 1, pageable);
+            } else if (categoryId != null) {
+                commodityPage = commodityRepository.findByCategoryIdAndStatus(categoryId, 1, pageable);
+            } else {
+                commodityPage = commodityRepository.findByStatus(1, pageable);
+            }
         } else {
-            commodityPage = commodityRepository.findAll(pageable);
+            if (StringUtils.hasLength(keyword) && categoryId != null) {
+                commodityPage = commodityRepository.findByNameContainingAndCategoryId(keyword, categoryId, pageable);
+            } else if (StringUtils.hasLength(keyword)) {
+                commodityPage = commodityRepository.findByNameContaining(keyword, pageable);
+            } else if (categoryId != null) {
+                commodityPage = commodityRepository.findByCategoryId(categoryId, pageable);
+            } else {
+                commodityPage = commodityRepository.findAll(pageable);
+            }
         }
 
         List<commodityDTO> dtoList = commodityPage.getContent().stream()
@@ -265,7 +296,15 @@ public class CommodityServiceImpl implements CommodityService {
 
         Pageable pageable = PageRequest.of(pageNum, size, Sort.by(Sort.Direction.DESC, "id"));
 
-        Page<Commodity> commodityPage = commodityRepository.findAllByIdIn(commodityIds, pageable);
+        // 普通用户只看到上架商品
+        String role = BaseContext.getCurrentRole();
+        boolean isUser = "USER".equals(role);
+        Page<Commodity> commodityPage;
+        if (isUser) {
+            commodityPage = commodityRepository.findAllByIdInAndStatus(commodityIds, pageable);
+        } else {
+            commodityPage = commodityRepository.findAllByIdIn(commodityIds, pageable);
+        }
 
         List<commodityDTO> dtoList = commodityPage.getContent().stream()
                 .map(commodity -> {

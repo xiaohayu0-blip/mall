@@ -1,6 +1,7 @@
 package com.gym.mall.controller;
 
 import com.gym.mall.domain.dto.commodityDTO;
+import com.gym.mall.interceptor.AdminOnly;
 import com.gym.mall.service.CommodityService;
 import com.gym.mall.validator.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ public class CommodityTagController {
     @Autowired
     private CommodityService commodityService;
 
+    @AdminOnly
     @PostMapping("/bind")
     public Response<commodityDTO> bindTags(@PathVariable Long commodityId,
                                            @RequestBody List<Long> tagIds){
@@ -26,6 +28,7 @@ public class CommodityTagController {
         }
     }
 
+    @AdminOnly
     @DeleteMapping("/{tagId}/unbind")
     public Response<String> unbindTag(@PathVariable Long commodityId, @PathVariable Long tagId) {
         try {

@@ -18,10 +18,11 @@ public class JwtUtils {
     @Value("${jwt.token.secretKey}")
     private String secretKey;
 
-    public String getToken(String userId,String userName){
+    public String getToken(String userId, String userName, String role){
         JWTCreator.Builder builder=JWT.create();
         return builder.withClaim("userId",userId)
                 .withClaim("userName",userName)
+                .withClaim("role", role)
                 .withClaim("timeStamp", Instant.now().toEpochMilli())
                 .sign(Algorithm.HMAC256(secretKey));
     }
@@ -33,6 +34,7 @@ public class JwtUtils {
 
         map.put("userId",decodedjwt.getClaim("userId").asString());
         map.put("userName", decodedjwt.getClaim("userName").asString());
+        map.put("role", decodedjwt.getClaim("role").asString());
         map.put("timeStamp", decodedjwt.getClaim("timeStamp").asLong().toString());
         return map;
     }
