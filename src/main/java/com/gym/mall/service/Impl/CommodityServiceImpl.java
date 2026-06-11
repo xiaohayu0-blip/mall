@@ -9,12 +9,14 @@ import com.gym.mall.domain.entity.Tag;
 import com.gym.mall.domain.dto.CommodityPageRequest;
 import com.gym.mall.domain.dto.CommodityPageResponse;
 import com.gym.mall.domain.dto.CommodityTagDTO;
-import com.gym.mall.domain.dto.commodityDTO;
+import com.gym.mall.domain.dto.CommodityDTO;
 import com.gym.mall.service.BloomFilterService;
+import com.gym.mall.service.CommoditySearchService;
 import com.gym.mall.service.CommodityService;
 import com.gym.mall.utils.BaseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,8 +59,13 @@ public class CommodityServiceImpl implements CommodityService {
     @Autowired
     private BloomFilterService bloomFilterService;
 
+    // @Lazy 避免与 CommoditySearchServiceImpl 循环依赖
+    @Autowired
+    @Lazy
+    private CommoditySearchService commoditySearchService;
+
     @Override
-    public Long addCommodity(commodityDTO commodityDTO) {
+    public Long addCommodity(CommodityDTO commodityDTO) {
         List<Commodity> commodityList = commodityRepository.findByName(commodityDTO.getName());
         if (!CollectionUtils.isEmpty(commodityList)) {
             throw new IllegalStateException("id" + commodityDTO.getId() + "has been taken");
@@ -66,11 +74,13 @@ public class CommodityServiceImpl implements CommodityService {
         bloomFilterService.addCommodity(commodity.getId());
         log.info("新增商品并添加到布隆过滤器，商品ID: {}", commodity.getId());
 
+        commoditySearchService.upsertDocument(commodity);
+
         return commodity.getId();
     }
 
     @Override
-    public commodityDTO getCommodityById(Long commodityId) {
+    public CommodityDTO getCommodityById(Long commodityId) {
         if (!bloomFilterService.mightContainCommodity(commodityId)) {
             log.warn("商品ID不存在（布隆过滤器拦截）: {}", commodityId);
             throw new RuntimeException("商品不存在: " + commodityId);
@@ -78,7 +88,7 @@ public class CommodityServiceImpl implements CommodityService {
 
         String key = COMMODITY_KEY + commodityId;
 
-        commodityDTO cachedCommodity = (commodityDTO) redisTemplate.opsForValue().get(key);
+        CommodityDTO cachedCommodity = (CommodityDTO) redisTemplate.opsForValue().get(key);
         if (cachedCommodity != null) {
             log.info("get commodity from cache, id: {}", commodityId);
             return cachedCommodity;
@@ -93,7 +103,7 @@ public class CommodityServiceImpl implements CommodityService {
             throw new RuntimeException("商品不存在: " + commodityId);
         }
 
-        commodityDTO dto = CommodityConverter.converterCommodity(commodity);
+        CommodityDTO dto = CommodityConverter.converterCommodity(commodity);
 
         if (dto.getCategoryId() != null) {
             categoryRepository.findById(dto.getCategoryId())
@@ -106,16 +116,16 @@ public class CommodityServiceImpl implements CommodityService {
     }
 
     @Override
-    public commodityDTO updateCommodityById(Long id, String name, String price, Long categoryId, String description, Integer stock) {
+    public CommodityDTO updateCommodityById(Long id, String name, Long price, Long categoryId, String description, Integer stock) {
         return updateCommodityById(id, name, price, categoryId, description, stock, null);
     }
 
-    public commodityDTO updateCommodityById(Long id, String name, String price, Long categoryId, String description, Integer stock, Integer status) {
+    public CommodityDTO updateCommodityById(Long id, String name, Long price, Long categoryId, String description, Integer stock, Integer status) {
         Commodity commodityInDB = commodityRepository.findById(id).orElseThrow(RuntimeException::new);
         if (StringUtils.hasLength(name)) {
             commodityInDB.setName(name);
         }
-        if (StringUtils.hasLength(price)) {
+        if (price != null) {
             commodityInDB.setPrice(price);
         }
         if (categoryId != null) {
@@ -135,6 +145,8 @@ public class CommodityServiceImpl implements CommodityService {
         redisTemplate.delete(COMMODITY_KEY + id);
         log.info("update commodity and delete cache, id: {}", id);
 
+        commoditySearchService.upsertDocument(commodity);
+
         return CommodityConverter.converterCommodity(commodity);
     }
 
@@ -146,6 +158,7 @@ public class CommodityServiceImpl implements CommodityService {
         redisTemplate.delete(COMMODITY_KEY + id);
         log.info("delete commodity and delete cache, id: {}", id);
 
+        commoditySearchService.deleteDocument(id);
         bloomFilterService.initCommodityBloomFilter();
         log.info("删除商品后重新初始化布隆过滤器，商品ID: {}", id);
     }
@@ -187,9 +200,9 @@ public class CommodityServiceImpl implements CommodityService {
             }
         }
 
-        List<commodityDTO> dtoList = commodityPage.getContent().stream()
+        List<CommodityDTO> dtoList = commodityPage.getContent().stream()
                 .map(commodity -> {
-                    commodityDTO dto = CommodityConverter.converterCommodity(commodity);
+                    CommodityDTO dto = CommodityConverter.converterCommodity(commodity);
                     if (dto.getCategoryId() != null) {
                         categoryRepository.findById(dto.getCategoryId())
                                 .ifPresent(category -> dto.setCategoryName(category.getName()));
@@ -210,7 +223,7 @@ public class CommodityServiceImpl implements CommodityService {
     @Transactional
     //声明式事务管理
     //保证这个方法里的所有数据库操作要么全部成功，要么全部失败回滚
-    public commodityDTO bindTagsToCommodity(Long commodityId,List<Long> tagIds){
+    public CommodityDTO bindTagsToCommodity(Long commodityId, List<Long> tagIds){
         Commodity commodity = commodityRepository.findById(commodityId)
                 .orElseThrow(()->new RuntimeException("商品不存在:"+commodityId));
 
@@ -218,8 +231,8 @@ public class CommodityServiceImpl implements CommodityService {
             Tag tag=tagRepository.findById(tagId)
                     .orElseThrow(()->new RuntimeException("标签不存在:"+tagId));
 
-            boolean exits=commodityTagRepository.existsByCommodityIdAndTagId(commodityId,tagId);
-            if(!exits){
+            boolean exists=commodityTagRepository.existsByCommodityIdAndTagId(commodityId,tagId);
+            if(!exists){
                 CommodityTag commodityTag=CommodityTag.builder()
                         .commodityId(commodityId)
                         .tagId(tagId)
@@ -252,17 +265,17 @@ public class CommodityServiceImpl implements CommodityService {
     }
 
     @Override
-    public List<commodityDTO> getCommoditiesByTagId(Long tagId) {
+    public List<CommodityDTO> getCommoditiesByTagId(Long tagId) {
 
         List<CommodityTagView> views = commodityRepository.findCommoditiesWithTags(tagId);
 
-        Map<Long, commodityDTO> dtoMap = new HashMap<>();
+        Map<Long, CommodityDTO> dtoMap = new HashMap<>();
 
         for (CommodityTagView view : views) {
 
-            commodityDTO dto = dtoMap.computeIfAbsent(
+            CommodityDTO dto = dtoMap.computeIfAbsent(
                     view.getCommodityId(),
-                    id -> new commodityDTO(
+                    id -> new CommodityDTO(
                             view.getCommodityId(),
                             view.getCommodityName(),
                             view.getCategoryId(),
@@ -306,9 +319,9 @@ public class CommodityServiceImpl implements CommodityService {
             commodityPage = commodityRepository.findAllByIdIn(commodityIds, pageable);
         }
 
-        List<commodityDTO> dtoList = commodityPage.getContent().stream()
+        List<CommodityDTO> dtoList = commodityPage.getContent().stream()
                 .map(commodity -> {
-                    commodityDTO dto = CommodityConverter.converterCommodity(commodity);
+                    CommodityDTO dto = CommodityConverter.converterCommodity(commodity);
                     if (dto.getCategoryId() != null) {
                         categoryRepository.findById(dto.getCategoryId())
                                 .ifPresent(category -> dto.setCategoryName(category.getName()));

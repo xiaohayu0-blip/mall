@@ -39,6 +39,11 @@ public class InventoryServiceImpl implements InventoryService {
     @Autowired
     private CommodityRepository commodityRepository;
 
+    /**
+     * 扣减库存
+     * @param commodityMap 商品ID -> 扣减数量
+     * @return
+     */
     @Override
     @Transactional
     public boolean deductStock(Map<Long, Integer> commodityMap) {
@@ -72,9 +77,10 @@ public class InventoryServiceImpl implements InventoryService {
                         .orElseThrow(() -> new RuntimeException("商品不存在: " + commodityId));
 
                 if (commodity.getStock() == null || commodity.getStock() < quantity) {
-                    log.warn("库存不足，commodityId: {}, 当前库存: {}, 需求: {}",
-                            commodityId, commodity.getStock(), quantity);
-                    return false;
+                    String msg = String.format("商品 [%s] 库存不足: 当前 %d, 需求 %d",
+                            commodity.getName(), commodity.getStock() == null ? 0 : commodity.getStock(), quantity);
+                    log.warn(msg);
+                    throw new RuntimeException(msg);
                 }
 
                 commodity.setStock(commodity.getStock() - quantity);
@@ -100,6 +106,10 @@ public class InventoryServiceImpl implements InventoryService {
         }
     }
 
+    /**
+     * 库存回退
+     * @param commodityMap 商品ID -> 回退数量
+     */
     @Override
     @Transactional
     public void restoreStock(Map<Long, Integer> commodityMap) {

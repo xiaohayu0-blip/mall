@@ -1,14 +1,14 @@
 package com.gym.mall.converter;
 
 import com.gym.mall.domain.entity.Commodity;
-import com.gym.mall.domain.dto.commodityDTO;
+import com.gym.mall.domain.dto.CommodityDTO;
 
 public class CommodityConverter {
-    public static commodityDTO converterCommodity(Commodity commodity) {
+    public static CommodityDTO converterCommodity(Commodity commodity) {
         if (commodity == null) {
             return null;
         }
-        return commodityDTO.builder()
+        return CommodityDTO.builder()
                 .id(commodity.getId())
                 .name(commodity.getName())
                 .price(commodity.getPrice())
@@ -19,7 +19,7 @@ public class CommodityConverter {
                 .build();
     }
 
-    public static Commodity converterCommodity(commodityDTO commodityDTO) {
+    public static Commodity converterCommodity(CommodityDTO commodityDTO) {
         if (commodityDTO == null) {
             return null;
         }

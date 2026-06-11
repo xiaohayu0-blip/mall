@@ -47,14 +47,39 @@ public interface CommodityRepository extends JpaRepository<Commodity,Long>, JpaS
     """)
     List<CommodityTagView> findCommoditiesWithTags(@Param("tagId") Long tagId);
 
-    @Query(value = "SELECT * FROM commodity " +
-            "WHERE id IN :ids"
-            , nativeQuery = true)
+    @Query(value = "SELECT * FROM commodity WHERE id IN :ids",
+            countQuery = "SELECT COUNT(*) FROM commodity WHERE id IN :ids",
+            nativeQuery = true)
     Page<Commodity> findAllByIdIn(List<Long> ids, Pageable pageable);
 
-    @Query(value = "SELECT * FROM commodity " +
-            "WHERE id IN :ids AND status = 1"
-            , nativeQuery = true)
+    @Query(value = "SELECT * FROM commodity WHERE id IN :ids AND status = 1",
+            countQuery = "SELECT COUNT(*) FROM commodity WHERE id IN :ids AND status = 1",
+            nativeQuery = true)
     Page<Commodity> findAllByIdInAndStatus(List<Long> ids, Pageable pageable);
+
+    // 搜索上架商品：关键词(FULLTEXT)、分类、价格区间均可选
+    @Query(value = """
+            SELECT * FROM commodity
+            WHERE status = 1
+              AND (:keyword IS NULL OR MATCH(name, description) AGAINST(:keyword IN BOOLEAN MODE))
+              AND (:categoryId IS NULL OR category_id = :categoryId)
+              AND (:minPrice IS NULL OR price >= :minPrice)
+              AND (:maxPrice IS NULL OR price <= :maxPrice)
+            """,
+            countQuery = """
+            SELECT COUNT(*) FROM commodity
+            WHERE status = 1
+              AND (:keyword IS NULL OR MATCH(name, description) AGAINST(:keyword IN BOOLEAN MODE))
+              AND (:categoryId IS NULL OR category_id = :categoryId)
+              AND (:minPrice IS NULL OR price >= :minPrice)
+              AND (:maxPrice IS NULL OR price <= :maxPrice)
+            """,
+            nativeQuery = true)
+    Page<Commodity> searchOnSale(
+            @Param("keyword") String keyword,
+            @Param("categoryId") Long categoryId,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
+            Pageable pageable);
 
 }

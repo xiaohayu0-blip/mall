@@ -73,17 +73,16 @@ public class OrderServiceImpl implements OrderService {
         // 3. 扣减库存（分布式锁）
         boolean stockResult = inventoryService.deductStock(stockMap);
         if (!stockResult) {
-            throw new RuntimeException("库存不足，下单失败");
+            throw new RuntimeException("系统繁忙，请稍后重试");
         }
 
         try {
-            // 4. 计算总金额（字符串价格 -> 分 -> 累加）
+            // 4. 计算总金额（price 已是分，直接累加）
             long totalAmount = 0;
             List<OrderItem> orderItems = new ArrayList<>();
 
             for (CartItemVO item : items) {
-                // 价格转换：字符串 "99.99" -> long 9999（分）
-                long priceInCents = yuanToCents(item.getPrice());
+                long priceInCents = item.getPrice();
                 long subtotal = priceInCents * item.getQuantity();
                 totalAmount += subtotal;
 
@@ -195,16 +194,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void payOrder(String orderNo) {
-        Order order = orderRepository.findByOrderNo(orderNo)
-                .orElseThrow(() -> new RuntimeException("订单不存在"));
-
-        if (!STATUS_PENDING.equals(order.getStatus())) {
+        long paidTime = Instant.now().toEpochMilli();
+        // 原子更新：只在订单状态为 PENDING 时更新为 PAID
+        int affected = orderRepository.updateStatusToPaid(orderNo, paidTime);
+        if (affected == 0) {
+            // 可能是订单不存在，或状态不是 PENDING（已支付/已取消）
+            Order order = orderRepository.findByOrderNo(orderNo)
+                    .orElseThrow(() -> new RuntimeException("订单不存在"));
             throw new RuntimeException("订单状态不是待支付，无法支付");
         }
-
-        order.setStatus(STATUS_PAID);
-        order.setPaidTime(Instant.now().toEpochMilli());
-        orderRepository.save(order);
         log.info("订单支付成功, orderNo: {}", orderNo);
     }
 
@@ -262,21 +260,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // ========== 辅助方法 ==========
-
-    /**
-     * 将价格字符串转为分
-     * "99.99" -> 9999
-     * "100" -> 10000
-     */
-    private long yuanToCents(String priceStr) {
-        try {
-            BigDecimal yuan = new BigDecimal(priceStr);
-            return yuan.multiply(new BigDecimal(100)).longValue();
-        } catch (Exception e) {
-            log.warn("价格格式异常: {}", priceStr);
-            return 0;
-        }
-    }
 
     /**
      * 将分转为元的字符串
@@ -344,7 +327,7 @@ public class OrderServiceImpl implements OrderService {
         // 批量查询用户信息
         Set<Long> userIds = orders.stream().map(Order::getUserId).collect(Collectors.toSet());
         Map<Long, User> userMap = userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(User::getUser_id, u -> u, (a, b) -> a));
+                .collect(Collectors.toMap(User::getUserId, u -> u, (a, b) -> a));
 
         // 批量查询订单项
         List<Long> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());

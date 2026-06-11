@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommodityPageResponse {
-    private java.util.List<commodityDTO> records;
+    private java.util.List<CommodityDTO> records;
     private Long total;
     private Integer page;
     private Integer pageSize;

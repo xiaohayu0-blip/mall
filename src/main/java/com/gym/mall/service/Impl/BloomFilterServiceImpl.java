@@ -6,24 +6,32 @@ import com.gym.mall.domain.entity.Commodity;
 import com.gym.mall.domain.entity.User;
 import com.gym.mall.service.BloomFilterService;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BloomFilterServiceImpl implements BloomFilterService {
 
-    private final RBloomFilter<Long> commodityBloomFilter;
-    private final RBloomFilter<Long> userBloomFilter;
-    private final CommodityRepository commodityRepository;
-    private final UserRepository userRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RBloomFilter<Long> commodityBloomFilter;
+
+    @Autowired
+    private RBloomFilter<Long> userBloomFilter;
+
+    @Autowired
+    private CommodityRepository commodityRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
     @Override
     public boolean mightContainCommodity(Long commodityId) {
         if (commodityId == null) {
@@ -58,8 +66,12 @@ public class BloomFilterServiceImpl implements BloomFilterService {
 
     @PostConstruct
     public void init() {
-        initCommodityBloomFilter();
-        initUserBloomFilter();
+        try {
+            initCommodityBloomFilter();
+            initUserBloomFilter();
+        } catch (Exception e) {
+            log.warn("布隆过滤器初始化跳过（数据库表尚未就绪，Flyway 将在后续建表）: {}", e.getMessage());
+        }
     }
 
 
@@ -86,7 +98,7 @@ public class BloomFilterServiceImpl implements BloomFilterService {
         log.info("开始初始化用户布隆过滤器...");
 
         List<Long> userIds = userRepository.findAll().stream()
-                .map(User::getUser_id)
+                .map(User::getUserId)
                 .toList();
 
         userBloomFilter.clearExpire();

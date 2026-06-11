@@ -1,13 +1,12 @@
 package com.gym.mall.consumer;
 
 import com.google.gson.Gson;
-import com.gym.mall.Repository.LIkesStatisticRepository;
+import com.gym.mall.Repository.LikesStatisticRepository;
 import com.gym.mall.Repository.LikesUserRecordRepository;
 import com.gym.mall.converter.LikesUserRecordConverter;
 import com.gym.mall.domain.entity.LikesStatistic;
 import com.gym.mall.domain.entity.LikesUserRecord;
 import com.gym.mall.domain.dto.LikesUserRecordDTO;
-import com.gym.mall.validator.LikesValidator;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -42,13 +41,10 @@ public class LikesMessageConsumer {
     private LikesUserRecordRepository likesUserRecordRepository;
 
     @Autowired
-    private LIkesStatisticRepository likesStatisticRepository;
+    private LikesStatisticRepository likesStatisticRepository;
 
     @Autowired
-    private RedisTemplate redisTemplate;
-
-    @Autowired
-    private LikesValidator likesValidator;
+    private RedisTemplate<String, Object> redisTemplate;
 
     private Gson gson=new Gson();
     //创建 Google Gson 对象实例，用于 JSON 序列化和反序列化（将消息转换为 Java 对象，或反之）
@@ -64,11 +60,7 @@ public class LikesMessageConsumer {
     public void handleMessage(LikesUserRecordDTO likesUserRecordDTO) {
         // 记录接收到的消息日志，方便调试和追踪
         log.info("Received message from queue{}:message:{}", queueName, gson.toJson(likesUserRecordDTO));
-        
-        // 对点赞数据进行参数校验，确保数据完整性和正确性
-        likesValidator.validateAddNewCommodity(likesUserRecordDTO);
-        
-        // 数据库查询用户是否已经点过赞
+
         likesUserRecordRepository.findUserLikeRecord(likesUserRecordDTO.getUserId(), likesUserRecordDTO.getBusinessId(),
                 likesUserRecordDTO.getItemId())
                 // 使用 ifPresentOrElse 判断：

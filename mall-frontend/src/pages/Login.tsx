@@ -79,7 +79,7 @@ const Login: React.FC = () => {
                   <Form.Item name="userName" rules={[{ required: true, message: '请输入用户名' }]}>
                     <Input prefix={<UserOutlined />} placeholder="用户名" />
                   </Form.Item>
-                  <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少6位' }]}>
+                  <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }, { min: 1, message: '密码不能为空' }]}>
                     <Input.Password prefix={<LockOutlined />} placeholder="密码" />
                   </Form.Item>
                   <Button type="primary" htmlType="submit" block loading={loading}>

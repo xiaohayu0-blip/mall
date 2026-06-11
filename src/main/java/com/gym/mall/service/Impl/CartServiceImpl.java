@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.gym.mall.Constants.CART_KEY;
@@ -49,7 +50,7 @@ public class CartServiceImpl implements CartService {
         commodityRepository.findById(commodityId)
                 .orElseThrow(() -> new RuntimeException("商品不存在: " + commodityId));
 
-        // Redis Hash 操作：如果 field 已存在则返回旧值，否则新增
+        // Redis Hash 操作：如果 field 已存在,则返回旧值，否则新增
         Object existed = redisTemplate.opsForHash().get(key, commodityId.toString());
         if (existed != null) {
             int oldQty = Integer.parseInt(existed.toString());
@@ -128,6 +129,13 @@ public class CartServiceImpl implements CartService {
         log.info("购物车清空, userId:{}", userId);
     }
 
+    /**
+     * 切换商品选中状态
+     *
+     * @param userId      用户 ID
+     * @param commodityId 商品 ID
+     * @param selected    是否选中
+     */
     @Override
     public void toggleSelect(Long userId, Long commodityId, Boolean selected) {
         // 选中状态用 Redis Hash 的额外字段存储，格式 commodityId -> "qty:selected"
@@ -146,15 +154,24 @@ public class CartServiceImpl implements CartService {
         String selectKey = CART_KEY + userId + ":selected";
 
         Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
-        // 获取选中的商品 ID
-        List<CartItemVO> items = new ArrayList<>();
-
         if (entries.isEmpty()) {
-            return items;
+            return new ArrayList<>();
         }
 
+        // 获取已选中的商品 ID 集合
+        Set<Object> selectedIds = redisTemplate.opsForSet().members(selectKey);
+        if (selectedIds == null || selectedIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<CartItemVO> items = new ArrayList<>();
         for (Map.Entry<Object, Object> entry : entries.entrySet()) {
             Long commodityId = Long.valueOf(entry.getKey().toString());
+            // 只返回已选中的商品
+            if (!selectedIds.contains(commodityId.toString())) {
+                continue;
+            }
+
             int quantity = Integer.parseInt(entry.getValue().toString());
 
             Commodity commodity = commodityRepository.findById(commodityId).orElse(null);

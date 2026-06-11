@@ -13,7 +13,7 @@ public class CartItemDTO {
     private Long id;
     private Long commodityId;
     private String commodityName;
-    private String price;
+    private Long price;
     private int quantity;
     private String sessionId;
 }

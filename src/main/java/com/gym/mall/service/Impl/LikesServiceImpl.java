@@ -1,6 +1,6 @@
 package com.gym.mall.service.Impl;
 
-import com.gym.mall.Repository.LIkesStatisticRepository;
+import com.gym.mall.Repository.LikesStatisticRepository;
 import com.gym.mall.Repository.LikesUserRecordRepository;
 import com.gym.mall.domain.entity.LikesStatistic;
 import com.gym.mall.domain.entity.LikesUserRecord;
@@ -28,14 +28,14 @@ public class LikesServiceImpl implements LikesService {
     // RabbitMQ 消息服务，用于异步发送点赞消息
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     // Redis 模板，用于缓存点赞数据，提高查询性能
 
     @Autowired
     private LikesUserRecordRepository likesUserRecordRepository;
 
     @Autowired
-    private LIkesStatisticRepository likesStatisticRepository;
+    private LikesStatisticRepository likesStatisticRepository;
 
     @Override
     public boolean addNewLikesRecord(LikesUserRecordDTO likesUserRecordDTO) {
@@ -46,7 +46,7 @@ public class LikesServiceImpl implements LikesService {
     @Override
     public List<Long> getMyLikes(long userId, Long businessId) {
         // 创建一个空列表，用于存放用户点赞过的项目ID
-        List<Long> likesItemIdList= Lists.newArrayList();
+        List<Long> likedItemIdList= Lists.newArrayList();
         // 从Redis缓存中获取该用户的所有点赞记录（使用Set数据结构存储）
         Set<String> allMyLikes = redisTemplate.opsForSet().members(LIKE_USER_KEY+userId);
         // 判断Redis缓存中是否有数据（不为null且不为空）
@@ -54,12 +54,12 @@ public class LikesServiceImpl implements LikesService {
             // 遍历缓存中的每一条点赞记录
             for(String like:allMyLikes){
                 // 将每条记录按":"分割，取第二部分（itemId），转成Long类型后添加到列表中
-                likesItemIdList.add(Long.valueOf(like.split(":")[1]));
+                likedItemIdList.add(Long.valueOf(like.split(":")[1]));
             }
             // 记录日志：从缓存加载数据
             log.info("load my likes from cache:businessId:{},userId:{}",businessId,userId);
             // 直接返回从缓存获取的点赞列表
-            return likesItemIdList;
+            return likedItemIdList;
         }
         // 如果缓存没有数据，从数据库查询该用户在指定业务下的所有点赞记录
         List<LikesUserRecord> likesUserRecordDTOList=likesUserRecordRepository
